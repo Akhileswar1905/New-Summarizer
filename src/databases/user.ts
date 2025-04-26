@@ -29,7 +29,7 @@ export const getUser = async (connection: PoolConnection, user_id: string) => {
         SELECT 'health', health FROM categories WHERE user_id = ?
       ) AS user_categories
       ORDER BY score DESC
-      LIMIT 2
+      LIMIT 0
       `,
       Array(9).fill(user_id) // pass user_id 9 times
     );

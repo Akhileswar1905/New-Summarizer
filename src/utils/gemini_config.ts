@@ -40,7 +40,7 @@ export async function generateRes(feed: string, language: string) {
   });
 
   const result = await model.generateContent(
-    `${feed}. Give me the summary of this feed like an explanation in 300 words in ${langName}.`
+    `${feed}. Give me the summary of this feed like an explanation in 150 words in ${langName}.`
   );
   const response = await result.response;
 

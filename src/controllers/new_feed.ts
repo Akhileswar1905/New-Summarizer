@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { getNews } from "../utils/news_feed";
 import { generateRes } from "../utils/gemini_config";
-import { getUser } from "../databases/user";
+// import { getUser } from "../databases/user";
 import { db } from "../utils/dbconfig";
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -12,41 +12,43 @@ export const getNewsToday = async (
 ): Promise<any> => {
   const connection = await db.promise().getConnection();
   try {
-    const { language, user_id } = req.query;
+    const { language, user_id, topic } = req.query;
 
     if (!user_id) {
       return res.status(400).json({ message: "User ID is required" });
     }
 
-    const user = await getUser(connection, user_id as string);
+    // const user = await getUser(connection, user_id as string);
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+    // if (!user) {
+    //   return res.status(404).json({ message: "User not found" });
+    // }
 
-    const categories = user.topCategories?.map(
-      (category: any) => category.category
-    );
+    // const categories = user.topCategories?.map(
+    //   (category: any) => category.category
+    // );
 
-    if (!categories || categories.length === 0) {
-      return res
-        .status(400)
-        .json({ message: "No categories found for the user" });
-    }
+    // if (!categories || categories.length === 0) {
+    //   return res
+    //     .status(400)
+    //     .json({ message: "No categories found for the user" });
+    // }
 
     let summarized_news: any[] = [];
     let news: any[] = [];
 
-    for (let category of categories) {
-      const n = await getNews(category);
-      news.push(...n);
-    }
+    // for (let category of categories) {
+    // }
+    const n = await getNews(topic as string, language as string);
+    news.push(...n);
 
+    console.log(news);
     for (let i = 0; i < news.length; i++) {
       const news_item = news[i];
+      console.log(news_item.title);
 
       // Delay to prevent hitting Gemini API rate limits
-      if (i !== 0) await delay(5000); // 5-second delay between summaries
+      if (i !== 0) await delay(3000); // 5-second delay between summaries
 
       try {
         const summary = await generateRes(
@@ -63,7 +65,7 @@ export const getNewsToday = async (
         });
       } catch (error) {
         console.error(`Failed to summarize news at index ${i}:`, error);
-        continue; // Skip this item on error
+        continue;
       }
     }
 
